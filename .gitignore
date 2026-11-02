@@ -1,0 +1,40 @@
+# File cấu hình riêng và thông tin đăng nhập
+.env
+.env.*
+!.env.example
+secrets.*
+credentials.*
+*.token
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Log thu thập và cơ sở dữ liệu trên máy
+data/
+*.db
+*.sqlite
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+*.jsonl
+*.log
+
+# Môi trường Python, thư viện cài thêm và bộ nhớ tạm
+.venv/
+venv/
+env/
+site-packages/
+vendor/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# File tạo khi đóng gói và cấu hình trình soạn thảo
+build/
+dist/
+*.egg-info/
+.vscode/
+.idea/
