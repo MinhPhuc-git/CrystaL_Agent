@@ -1,0 +1,14 @@
+CONNECT_TYPE_NAMES: dict[str, str] = {
+    "0": "System",
+    "2": "Interactive",
+    "3": "Network",
+    "4": "Batch",
+    "5": "Service",
+    "7": "Unlock",
+    "8": "NetworkCleartext",
+    "9": "NewCredentials",
+    "10": "RemoteInteractive",
+    "11": "CachedInteractive",
+    "12": "CachedRemoteInteractive",
+    "13": "CachedUnlock",
+}

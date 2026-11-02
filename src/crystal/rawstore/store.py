@@ -38,5 +38,3 @@ class RawStore:
         self._seen[source_key] = observed_at
         return observed_at
 
-    def contains(self, source_key: str) -> bool:
-        return source_key in self._seen

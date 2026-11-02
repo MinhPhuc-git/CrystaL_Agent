@@ -111,7 +111,7 @@ while ($true) {{
     }}
     $items=@(Get-WinEvent -LogName 'Security' -FilterXPath $xpath -Oldest -MaxEvents {self.batch_size} -ErrorAction Stop)
     foreach($e in $items) {{
-      # Lấy trường có tên và phần mô tả thân thiện; không xuất XML.
+      # Lấy trường có tên và phần mô tả dễ nhìn;
       $properties=@($e.Properties | ForEach-Object {{ if ($null -eq $_.Value) {{ $null }} else {{ [string]$_.Value }} }})
       $message=''; try {{ $message=$e.FormatDescription() }} catch {{}}
       $o=@{{record_id=[string]$e.RecordId;event_id=$e.Id;event_name=$names[[int]$e.Id];time_created=$e.TimeCreated.ToUniversalTime().ToString('o');computer=$e.MachineName;provider=$e.ProviderName;version=$e.Version;message=$message;properties=$properties}}

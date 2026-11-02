@@ -20,6 +20,8 @@ def _rewrite_json_lines(path: Path, *, key_path: tuple[str, ...]) -> int:
         key: Any = item
         for name in key_path:
             key = key.get(name) if isinstance(key, dict) else None
+        if not key and path.name.startswith("event-"):
+            key = item.get("event_uid") if isinstance(item, dict) else None
         if key:
             key = str(key)
             if key in seen:

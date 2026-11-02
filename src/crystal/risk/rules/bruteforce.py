@@ -2,6 +2,7 @@ from collections import defaultdict, deque
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from crystal.normalization.auth import AuthEvent
+from crystal.normalization.connect_type import CONNECT_TYPE_NAMES
 
 
 @dataclass(frozen=True)
@@ -17,6 +18,10 @@ class Finding:
     window_end: datetime
     evidence_ids: tuple[str, ...]
     reason: str
+
+
+# Tên chuẩn để risk rule có thể phân loại Logon Type ở bước tiếp theo.
+LOGON_TYPE_NAMES = CONNECT_TYPE_NAMES
 
 
 class BruteForceRule:

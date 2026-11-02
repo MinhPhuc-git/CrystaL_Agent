@@ -73,6 +73,45 @@ def _open_database(db_path: Path, raw_path: Path, logs_dir: Path) -> Database:
     return db
 
 
+def _log_checkpoint(logs_dir: Path) -> tuple[int, str | None]:
+    """Dùng event mới nhất trong log chuẩn hóa làm mốc khi SQLite đang tắt."""
+    latest_record_id = 0
+    latest_event_time = None
+    try:
+        log_files = sorted(logs_dir.glob("event-*.log"))
+    except OSError:
+        log_files = []
+
+    for path in log_files:
+        try:
+            lines = path.read_text(encoding="utf-8").splitlines()
+        except OSError:
+            continue
+        for line in lines:
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            event_id = str(event.get("event_uid") or (event.get("event") or {}).get("id") or "")
+            parts = event_id.split(":")
+            record_value = event.get("record_id")
+            if record_value is not None:
+                try:
+                    record_id = int(record_value)
+                except (TypeError, ValueError):
+                    continue
+            elif len(parts) >= 3 and parts[-2].isdigit():
+                record_id = int(parts[-2])
+            else:
+                continue
+            if record_id > latest_record_id:
+                latest_record_id = record_id
+                latest_event_time = event.get("event_time") or event.get("@timestamp")
+
+    # Không có log hợp lệ thì collector tự quét 24 giờ gần nhất.
+    return latest_record_id, latest_event_time
+
+
 def run_live() -> int:
     root = _root()
     db_path = _data_path(root, "CRYSTAL_DB_PATH", "db/crystal.sqlite3")
@@ -94,14 +133,11 @@ def run_live() -> int:
             db.health("Windows-Security", "running")
             checkpoint_id, checkpoint_time = db.checkpoint("Windows-Security")
         else:
-            # Không có checkpoint thì quét lại 24 giờ; RawStore bỏ qua event đã lưu.
-            checkpoint_id, checkpoint_time = 0, None
+            checkpoint_id, checkpoint_time = _log_checkpoint(logs_dir)
         print(f"Resume checkpoint: RecordID={checkpoint_id}, time={checkpoint_time or '24-hour initial scan'}", flush=True)
         for record in SecurityEventCollector().stream(checkpoint_id, checkpoint_time):
             uid = record["event_uid"]
             record_id = int(record.get("record_id") or 0)
-            if db is None and raw.contains(uid):
-                continue
             observed = raw.append(record["source"], uid, record)
             auth = normalize_auth(record)
             normalized = auth.as_dict() if auth else None
